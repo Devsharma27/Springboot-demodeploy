@@ -7,9 +7,6 @@ node {
          stage('Clone Repo') {
             // for display purposes
             // Get some code from a GitHub repository
-            // git url: 'https://github.com/Devsharma27/Springboot-demodeploy.git',
-            //     // credentialsId: 'springdeploy-user',
-            //     branch: 'main'
             git branch: 'main', url: 'https://github.com/Devsharma27/Springboot-demodeploy.git'
          }
           stage('Build docker') {
