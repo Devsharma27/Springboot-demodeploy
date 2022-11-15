@@ -1,21 +1,17 @@
-# Docker Build Stage
-FROM maven:3-jdk-8-alpine AS build
-
-
-# Build Stage
-WORKDIR /opt/app
-
-COPY ./ /opt/app
-RUN mvn clean install -DskipTests
-
-
-# Docker Build Stage
-FROM openjdk:8-jdk-alpine
-
-COPY --from=build /opt/app/target/*.jar app.jar
-
-ENV PORT 8081
-EXPOSE $PORT
-
-ENTRYPOINT ["java","-jar","-Xmx1024M","-Dserver.port=${PORT}","app.jar"]
-
+# Maven 
+FROM maven:3.8.1-openjdk-11-slim AS builder
+WORKDIR /app
+COPY pom.xml .
+RUN mvn -e -B dependency:resolve
+COPY src ./src
+RUN mvn clean -e -B package
+ 
+# RTSDK Java
+FROM openjdk:11-jre-slim-buster
+WORKDIR /app
+COPY --from=builder /app/target/cloud_consumer-1.0-jar-with-dependencies.jar .
+COPY EmaConfig.xml .
+COPY etc ./etc
+COPY run.sh ./run.sh
+# Use shell script to support passing application name and its arguments to the ENTRYPOINT
+ENTRYPOINT [ "./run.sh" ]
